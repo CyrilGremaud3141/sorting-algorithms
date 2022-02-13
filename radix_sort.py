@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import multiprocessing
 import os
-num_processes = 100
+num_processes = 1
 if num_processes > os.cpu_count():
     num_processes = os.cpu_count()
 print(num_processes)
