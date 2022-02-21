@@ -5,10 +5,11 @@ from tqdm import tqdm
 
 import multiprocessing
 import os
-num_processes = 1
+
+num_processes = 8
 if num_processes > os.cpu_count():
     num_processes = os.cpu_count()
-print(num_processes)
+# print(num_processes)
 
 def randomList(n):
     l = list(range(n))
@@ -37,59 +38,64 @@ def radix(lis):
 
 
 
-def sample(nu):
+def sample(nu, sample_count):
     for sample in range(sample_count):
         radix(randomList(nu))
 
 
-sample_count = 1000
-max_amount_numbers = 3000
 
-processes = []
+def run():
+    sample_count = 1000
+    max_amount_numbers = 3000
 
-time_list = []
+    processes = []
 
-for pr in range(num_processes):
-    p = multiprocessing.Process(target=sample, args=[pr+1])
-    p.start()
-    processes.append((p, time.time()))
+    time_list = []
 
-for nu in tqdm(range(num_processes+1, max_amount_numbers)):
+    for pr in range(num_processes):
+        p = multiprocessing.Process(target=sample, args=[pr+1, sample_count])
+        p.start()
+        processes.append((p, time.time()))
 
-    processes[0][0].join()
-    time1 = processes[0][1]
-    time2 = time.time()
+    for nu in tqdm(range(num_processes+1, max_amount_numbers)):
 
-    time_difference = (time2 - time1)/sample_count
-    time_list.append(time_difference)
+        processes[0][0].join()
+        time1 = processes[0][1]
+        time2 = time.time()
 
-
-    plt.plot(range(len(time_list)), time_list,  "b.")
-    plt.draw()
-    plt.pause(0.0001)
-    plt.clf()
-
-    processes.pop(0)
-    p = multiprocessing.Process(target=sample, args=[nu])
-    p.start()
-    processes.append((p, time.time()))
+        time_difference = (time2 - time1)/sample_count
+        time_list.append(time_difference)
 
 
-for process in processes:
-    process[0].join()
-    time1 = process[1]
-    time2 = time.time()
+        plt.plot(range(len(time_list)), time_list,  "b.")
+        plt.draw()
+        plt.pause(0.0001)
+        plt.clf()
 
-    time_difference = (time2 - time1)/sample_count
-    time_list.append(time_difference)
+        processes.pop(0)
+        p = multiprocessing.Process(target=sample, args=[nu, sample_count])
+        p.start()
+        processes.append((p, time.time()))
 
 
-    plt.plot(range(len(time_list)), time_list,  "b.")
-    plt.draw()
-    plt.pause(0.0001)
-    plt.clf()
+    for process in processes:
+        process[0].join()
+        time1 = process[1]
+        time2 = time.time()
+
+        time_difference = (time2 - time1)/sample_count
+        time_list.append(time_difference)
+
+
+        plt.plot(range(len(time_list)), time_list,  "b.")
+        plt.draw()
+        plt.pause(0.0001)
+        plt.clf()
 
     
 
-plt.plot(range(max_amount_numbers-1), time_list,  "b.")
-plt.show()
+    plt.plot(range(max_amount_numbers-1), time_list,  "b.")
+    plt.show()
+
+if __name__ == '__main__':
+    run()
